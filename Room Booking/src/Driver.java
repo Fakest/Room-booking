@@ -3,6 +3,8 @@ public class Driver {
     public static void main(String args[]){
         File dataFile;
         BookingManager system = new BookingManager(File dataFile);
+        system.initialize();
+
     }
 
     private void makeBooking(){

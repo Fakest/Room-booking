@@ -4,19 +4,16 @@ import java.util.*;
 public abstract class Room {
     private String roomNum;
     private int breakoutSeats;
-    private int workstations;
-
     private List<Booking> bookings = new ArrayList<Booking>();
 
 
-    protected Room(String roomNum, int breakoutSeats, int workstations){
+    protected Room(String roomNum, int breakoutSeats){
         this.roomNum = roomNum;
         this.breakoutSeats = breakoutSeats;
-        this.workstations = workstations;
     }
 
     public int getBreakoutCount(){
-        return 1;
+        return breakoutSeats;
     }
 
     public boolean isBookable(LocalDateTime time, int duration){
@@ -27,15 +24,11 @@ public abstract class Room {
 
     }
     public boolean cancelBooking(int reference){
-
+        return true;
     }
 
     public List<Booking> getBookings() {
         return bookings;
-    }
-
-    public int getWorkStations(){
-        return workstations;
     }
 
 }
