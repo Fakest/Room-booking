@@ -117,14 +117,6 @@ public class BookingManager {
 					Date date = format.parse(input); //date is equal to the input parsed to the format above
 					bookingSlot = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault()); //convert date to local date time
 
-					//2:11, for some reason i cannot book the same day as today, whatever ill fix it tomorrow
-
-
-
-
-
-					//FIX IT HARRY
-
 					if(bookingSlot.isBefore(LocalDate.now().atTime(0, 0,0))){
 						System.out.println("You cannot enter a date in the past. Please enter a future date: ");
 						valid = false;
@@ -144,9 +136,9 @@ public class BookingManager {
 			valid = false;
 			input = in.nextLine();
 			if(input.matches("^(0[0-9]|1[0-9]|2[0-3]|[0-9]):[0-5][0-9]$")) {
-				bookingSlot.withHour(Integer.parseInt(input.substring(0, 1))).withMinute(Integer.parseInt(input.substring(3, 4)));
-				if (bookingSlot.isBefore(LocalDateTime.now().minusDays(1).withHour(23).withMinute(59).withSecond(59))) {
-					System.out.println("You cannot enter a time in the past to book a table, please enter a valid date: ");
+
+				if (bookingSlot.withHour(Integer.parseInt(input.substring(0, 2))).withMinute(Integer.parseInt(input.substring(3, 5))).isBefore(LocalDateTime.now())) {
+					System.out.println("You cannot enter a time in the past to book a room, please enter a valid time: ");
 					valid = false;
 				} else {
 					valid = true;
@@ -156,6 +148,11 @@ public class BookingManager {
 				System.out.println("Invalid time entered, please enter a time in the format of HH:MM: ");
 				valid = false;
 			}
+		}while(!valid);
+
+		System.out.println("How many hours do you want to book the room for: ");
+		do{
+
 		}while(!valid);
 	}
 }
