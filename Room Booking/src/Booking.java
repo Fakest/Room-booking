@@ -6,7 +6,7 @@ public class Booking implements Comparable{
     private int duration;
     private int reference;
 
-    private Booking(Client booker, LocalDateTime time, int duration, int reference) {
+    public Booking(Client booker, LocalDateTime time, int duration, int reference) {
         this.booker = booker;
         this.time = time;
         this.duration = duration;
@@ -35,7 +35,17 @@ public class Booking implements Comparable{
         return true;
     }
 
-    @Override
+	@Override
+	public String toString() {
+		return "Booking{" +
+				"booker=" + booker +
+				", time=" + time +
+				", duration=" + duration +
+				", reference=" + reference +
+				'}';
+	}
+
+	@Override
     public int compareTo(Object o) {
         return 0;
     }

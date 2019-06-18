@@ -6,7 +6,14 @@ public class Conference extends Room{
         this.smartBoard = smartBoard;
     }
 
-    public boolean hasSmartBoard(){
+	@Override
+	public String toString() {
+		return "Conference{" +
+				"smartBoard=" + smartBoard +
+				'}';
+	}
+
+	public boolean hasSmartBoard(){
         return smartBoard;
     }
 }

@@ -12,6 +12,7 @@ public class Driver {
 			System.out.println("b) Cancel Booking");
 			System.out.println("c) Generate report");
 			System.out.println("d) Add client");
+			System.out.println("e) End session");
 			String choice = in.nextLine();
 			char i = choice.charAt(0);
 			switch (i){
@@ -29,7 +30,6 @@ public class Driver {
 		}while(running);
     }
 
-
     private static void makeBooking(){
 				system.bookingDetails();
     }
@@ -37,7 +37,45 @@ public class Driver {
 
     }
     private static void generateReport(){
+		boolean valid;
+		String familyName;
+		String givenName;
+		Client client;
+		do {
+			System.out.println("Enter your family name: ");
+			valid = false;
+			familyName = in.nextLine();
+			if (familyName.matches("[A-Z][a-z]*")) {
+				valid = true;
+			} else {
+				valid = false;
+				System.out.println("Invalid family name, your name must start with a capital letter. Please try again: ");
+			}
+		} while (!valid);
+		System.out.println("Enter your given name: ");
+		do {
+			valid = false;
+			givenName = in.nextLine();
+			if (givenName.matches("[A-Z][a-z]*")) {
+				valid = true;
+			} else {
+				valid = false;
+				System.out.println("Invalid given name, your name must start with a capital letter. Please try again: ");
+			}
+		} while (!valid);
 
+		if (!system.clientExists(familyName, givenName)) {
+			System.out.println("Client does not exist.");
+			return;
+		} else {
+			for (Client c : system.getClients()
+					) {
+				if (c.getFamilyName().equals(familyName) && c.getGivenName().equals(givenName)) {
+					client = c;
+				}
+			}
+
+		}
     }
     private static void addClient(){
     	boolean valid = false;
