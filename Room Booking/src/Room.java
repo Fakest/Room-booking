@@ -1,13 +1,15 @@
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.io.Serializable;
 
-public abstract class Room {
+public abstract class Room implements Serializable {
     private String roomNum;
     private int breakoutSeats;
     private List<Booking> bookings = new ArrayList<Booking>();
 
-
-
+	public Room() {
+	}
 
 	protected Room(String roomNum, int breakoutSeats){
         this.roomNum = roomNum;
@@ -22,11 +24,15 @@ public abstract class Room {
 		return roomNum;
 	}
     public boolean isBookable(LocalDateTime time, int duration){
+		boolean valid = true;
 		for (Booking booking: bookings
 			 ) {
-			if (booking.overlaps())
+			if (booking.overlaps(time, duration)){
+				valid = false;
+			}
+
 		}
-        return true;
+		return valid;
     }
 
     public void bookRoom(Client client, LocalDateTime time, int duration){
@@ -36,7 +42,15 @@ public abstract class Room {
 		System.out.println(thisBooking);
     }
     public boolean cancelBooking(int reference){
-        return true;
+		for (Booking booking: bookings
+			 ) {
+			if(booking.getReference() == reference){
+				bookings.remove(booking);
+				return true;
+			}
+		}
+		return false;
+
     }
 
     public List<Booking> getBookings() {

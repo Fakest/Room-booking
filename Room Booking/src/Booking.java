@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Booking implements Comparable{
+public class Booking implements Serializable {
     private Client booker;
     private LocalDateTime time;
     private int duration;
@@ -31,8 +32,16 @@ public class Booking implements Comparable{
 
 
 
-    public boolean overlaps(Booking booking){
-        return true;
+    public boolean overlaps(LocalDateTime slot, int duration){
+    	LocalDateTime booking1start = this.time;
+    	LocalDateTime booking1end = this.time.plusHours(this.duration);
+    	LocalDateTime booking2start = slot;
+    	LocalDateTime booking2end = slot.plusHours(duration);
+    	if(booking1start.isBefore(booking2end) && booking1end.isAfter(booking2start)){
+    		return true;
+		}else{
+    		return false;
+		}
     }
 
 	@Override
@@ -45,8 +54,4 @@ public class Booking implements Comparable{
 				'}';
 	}
 
-	@Override
-    public int compareTo(Object o) {
-        return 0;
-    }
 }

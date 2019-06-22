@@ -26,4 +26,14 @@ public class Client {
     public String getPhone() {
         return phone;
     }
+
+	@Override
+	public String toString() {
+		return "Client{" +
+				"familyName='" + familyName + '\'' +
+				", givenName='" + givenName + '\'' +
+				", email='" + email + '\'' +
+				", phone='" + phone + '\'' +
+				'}';
+	}
 }

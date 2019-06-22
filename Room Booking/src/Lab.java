@@ -1,10 +1,15 @@
-public class Lab extends Room {
+import java.io.Serializable;
+
+public class Lab extends Room implements Serializable {
 
     private int workStations;
     private boolean printer;
     private boolean smartBoard;
 
-    public Lab(String roomNum, int workStations, int breakoutSeats, boolean smartBoard, boolean printer) {
+	public Lab() {
+	}
+
+	public Lab(String roomNum, int workStations, int breakoutSeats, boolean smartBoard, boolean printer) {
         super(roomNum, breakoutSeats);
         this.workStations = workStations;
         this.printer = printer;

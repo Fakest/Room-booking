@@ -1,9 +1,10 @@
-import java.io.File;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class BookingManager {
     private int bookingfRef;
@@ -16,60 +17,81 @@ public class BookingManager {
         this.dataFile = dataFile;
     }
 
-    public void loadData(){
+    public void loadData() {
+		try {
+			FileInputStream fis = new FileInputStream(dataFile);
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			this.rooms = (HashMap<String, Room>) ois.readObject();
+			ois.close();
 
-    }
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+		public void saveData(File dataFile){
+		try{
+			FileOutputStream fos = new FileOutputStream(dataFile);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
 
-    public void saveData(){
+			oos.writeObject(this.rooms);
+		} catch (IOException e) {
 
-    }
+		}
+	}
     public boolean addClient(String familyName, String givenName, String email, String number){
         clients.add(new Client(familyName, givenName, email, number));
         return true;
     }
     public String findBooking(LocalDateTime date, int duration, int reference){
-
+		return null;
     }
     public String findBooking(LocalDateTime date, int duration, int reference, int breakoutSeats){
-
+		return null;
     }
     public void bookRoom(Client client, String roomNum, LocalDateTime date, int duration){
 		Room currRoom = rooms.get(roomNum);
 		currRoom.bookRoom(client, date, duration);
     }
     public boolean cancelBooking(int reference){
-
+		for (Map.Entry<String, Room> entry : rooms.entrySet()) {
+			if(entry.getValue().cancelBooking(reference)){
+				System.out.println("Booking removed");
+				return true;
+			}
+		}
+		System.out.println("No booking matching booking reference.");
+		return false;
     }
     public void listBookings(String roomNum){
-
+		System.out.println(rooms.get(roomNum).getBookings());
     }
     public void listBookings(Client client){
 
     }
     public boolean clientExists(String familyName, String givenName){
+
         for (Client c: clients
              ) {
-			return c.getFamilyName().equals(familyName) && c.getGivenName().equals(givenName);
+			if(c.getFamilyName().equals(familyName) && c.getGivenName().equals(givenName)){
+				return true;
+			}
         }
         return false;
     }
 
     public void initialize(){
-        rooms.put("006", new Meeting("006", 12));
-        rooms.put("008", new Lab("008", 18, 10, true, true));
-        rooms.put("011", new Lab("011", 20, 0, true, true));
-        rooms.put("013", new Lab("013", 6, 0, false, true));
-        rooms.put("014", new Lab("014",18, 2, true, true));
-        rooms.put("015", new Lab("015", 18, 10, true, true));
-        rooms.put("017", new Lab("018", 18, 10, true, true));
-        rooms.put("108", new Conference("108", 20, true));
-        rooms.put("120", new Lab("120",18, 0, true, true));
-        rooms.put("301", new Lab("301",18, 6, true, true));
+        loadData();
     }
 
 	public void bookingDetails() {
 		boolean valid = false;
 		boolean hasSmartboard = false;
+		boolean roomFound = false;
+
 		String familyName;
 		String givenName;
 		String input;
@@ -146,12 +168,15 @@ public class BookingManager {
 		do {
 			valid = false;
 			input = in.nextLine();
+
 			if (input.matches("^(0[0-9]|1[0-9]|2[0-3]|[0-9]):[0-5][0-9]$")) {
-				if (bookingSlot.withHour(Integer.parseInt(input.substring(0, 2))).withMinute(Integer.parseInt(input.substring(3, 5))).isBefore(LocalDateTime.now())) {
+				bookingSlot = bookingSlot.withHour(Integer.parseInt(input.substring(0, 2))).withMinute(Integer.parseInt(input.substring(3, 5)));
+				if (bookingSlot.isBefore(LocalDateTime.now())) {
 					System.out.println("You cannot enter a time in the past to book a room, please enter a valid time: ");
 					valid = false;
 				} else {
 					valid = true;
+					System.out.println(bookingSlot);
 				}
 			} else {
 				System.out.println("Invalid time entered, please enter a time in the format of HH:MM: ");
@@ -161,7 +186,6 @@ public class BookingManager {
 
 		System.out.println("Enter how long you want to book the room for in hours, whole numbers only please: ");
 		do{
-			valid = false;
 			try{
 				duration = in.nextInt();
 				valid = true;
@@ -174,8 +198,9 @@ public class BookingManager {
 
 		System.out.println("What type of room do you need?");
 		System.out.println("a) Lab");
-		System.out.println("b) Meeting");
-		System.out.println("c) Conference");
+		System.out.println("b) Conference");
+		System.out.println("c) Meeting");
+		in.skip(Pattern.compile("\n")); //for some reason in.nextln() was taking in an empty line, by doing this it solves it. I dont know why, but it works
 		String choice = in.nextLine();
 		char i = choice.charAt(0);
 		switch (i){
@@ -192,7 +217,7 @@ public class BookingManager {
 						in.nextLine(); //flush input
 					}
 				} while (!valid);
-				System.out.println("How many work stations do you require: ");
+				System.out.println("How many seats do you require: ");
 				do {
 					valid = false;
 					try {
@@ -211,6 +236,9 @@ public class BookingManager {
 					}else{
 						if(((Lab) room).getWorkstationsCount() >= reqWorkStations && ((Lab) room).getBreakoutCount() >=reqBreakoutSeats && room.isBookable(bookingSlot, duration)){
 							bookRoom(client, room.getRoomNum(), bookingSlot, duration);
+							roomFound = true;
+							System.out.println("Room " + room.getRoomNum() + " has been booked at " + bookingSlot + " for " +duration+ " hours");
+							break;
 						}
 					}
 				}
@@ -221,6 +249,7 @@ public class BookingManager {
 					valid = false;
 					try {
 						reqBreakoutSeats = in.nextInt();
+						in.nextLine(); //flush input
 						valid = true;
 					} catch (InputMismatchException e) {
 						System.out.println("Invalid data entered, please enter an integer number: ");
@@ -251,15 +280,20 @@ public class BookingManager {
 					} else {
 						if(((Conference) room).getBreakoutCount() >= reqBreakoutSeats && ((Conference) room).hasSmartBoard() == hasSmartboard && room.isBookable(bookingSlot, duration)){
 							bookRoom(client, room.getRoomNum(), bookingSlot, duration);
+							roomFound = true;
+							System.out.println("Room " + room.getRoomNum() + " has been booked at " + bookingSlot + " for " +duration+ " hours");
+							break;
 						}
 					}
 				}
+				break;
 			case 'c':
 				System.out.println("How many breakout seats do you require: ");
 				do {
 					valid = false;
 					try {
 						reqBreakoutSeats = in.nextInt();
+						in.nextLine();//flush input
 						valid = true;
 					} catch (InputMismatchException e) {
 						System.out.println("Invalid data entered, please enter an integer number: ");
@@ -274,14 +308,25 @@ public class BookingManager {
 					} else {
 						if((room).getBreakoutCount() >= reqBreakoutSeats && room.isBookable(bookingSlot, duration)){
 							bookRoom(client, room.getRoomNum(), bookingSlot, duration);
+							roomFound = true;
+							System.out.println("Room " + room.getRoomNum() + " has been booked at " + bookingSlot + " for " +duration+ " hours");
+							break;
 						}
 					}
 				}
+				break;
+		}
+		if(!roomFound){
+			System.out.println("Sorry no room could be found");
 		}
     }
 
 	public LinkedList<Client> getClients() {
     	return clients;
+	}
+
+	public HashMap<String, Room> getRooms() {
+		return rooms;
 	}
 }
 
